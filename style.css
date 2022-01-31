@@ -1,0 +1,39 @@
+body{
+    background: grey;
+    padding: 0;
+}
+#main-area{
+    width: 95vw;
+    height: 90vh;
+    background: url("img/floor2.jpg") center;
+    margin: 5vh auto;
+}
+#soldier{
+    position: absolute;
+    background: url("img/soldier2.png") no-repeat;
+    left: auto;
+    right: auto;
+    padding: 0;
+    width: 60px;
+    height: 100px;
+}
+/*#soldier-picture{
+    width: 60px;
+    height: 100px;
+}
+#soldier-picture circle{
+    stroke: white;
+    stroke-width: 3px;
+}
+#soldier-picture-body{
+    stroke: white;
+    stroke-width: 3px;
+}
+.soldier-picture-leg{
+    stroke: white;
+    stroke-width: 3px;
+}
+.soldier-picture-arm{
+    stroke: white;
+    stroke-width: 3px;
+}*/
