@@ -8,6 +8,7 @@ body{
     height: 90vh;
     background: url("img/floor2.jpg") center;
     margin: 5vh auto;
+    z-index: 1;
 }
 #human{
     position: absolute;
@@ -15,6 +16,7 @@ body{
     padding: 0;
     width: 60px;
     height: 100px;
+    z-index: 3;
 }
 .zombie{
     position: absolute;
@@ -22,24 +24,11 @@ body{
     padding: 0;
     width: 60px;
     height: 100px;
+    z-index: 3;
 }
-/*#soldier-picture{
-    width: 60px;
-    height: 100px;
+#game-info{
+    position: absolute;
+    background: darkslategrey;
+    color: white;
+    z-index: 4;
 }
-#soldier-picture circle{
-    stroke: white;
-    stroke-width: 3px;
-}
-#soldier-picture-body{
-    stroke: white;
-    stroke-width: 3px;
-}
-.soldier-picture-leg{
-    stroke: white;
-    stroke-width: 3px;
-}
-.soldier-picture-arm{
-    stroke: white;
-    stroke-width: 3px;
-}*/

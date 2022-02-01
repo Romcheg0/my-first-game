@@ -1,4 +1,15 @@
-var mainArea = document.getElementById("main-area")
+var mainArea = document.getElementById("main-area");
+var gameInfo = document.getElementById("game-info");
+var nameInfo = gameInfo.getElementsByTagName("caption")[0];
+var healthInfo = gameInfo.getElementsByTagName("td")[1];
+var ammoInfo = gameInfo.getElementsByTagName("td")[3];
+var fragsInfo = gameInfo.getElementsByTagName("td")[5];
+
+console.log(nameInfo, healthInfo, ammoInfo, fragsInfo);
+
+gameInfo.style.left = parseInt(mainArea.offsetLeft+mainArea.offsetWidth-gameInfo.offsetWidth) + 'px';
+gameInfo.style.top = mainArea.offsetTop + 'px';
+
 
 var wPressed = false;
 var aPressed = false;
@@ -101,14 +112,20 @@ class Entity{
 class Human extends Entity{
     type = "human";
     object = document.createElement("div");
+    ammo = 100;
 
-    constructor(name, health, speed, damage, skin = "url(img/soldier2.png)"){
+    constructor(name, health, ammo, speed, damage, skin = "url(img/soldier2.png)"){
         super(name);
         this.health = health;
+        this.ammo = ammo;
         this.speed = speed;
         this.damage = damage;
         this.skin = skin;
         this.object.style.background = skin;
+
+        nameInfo.textContent = name;
+        healthInfo.textContent = this.health;
+        ammoInfo.textContent = this.ammo;
     }
 
     spawn(){
@@ -246,20 +263,26 @@ class Zombie extends Entity{
 
     bite(){
         this.target.health -= this.damage;
-        console.log(this.target.health);
+        healthInfo.textContent = this.target.health;
         if(this.target.health <= 0){
             this.target = null;
             mainArea.removeChild(document.getElementById("human"));
             for(var i = 0; i < document.getElementsByClassName("zombie").length; i++){
                 mainArea.removeChild(document.getElementsByClassName("zombie")[i]);
-                mainArea.style.background="red";
+                mainArea.style.transition="2s";
+                mainArea.style.width="0";
+                mainArea.innerHTML="";
             }
         }
         
     }
 }
 
-let Bill = new Human("Bill", 100, 10, 20)
-Bill.spawn();
-let John = new Zombie("John", 100, 5, 20, Bill);
+class Bullet{
+    damage = 20;
+    speed = 30;
+}
+let Hero = new Human("Bill", 100, 100, 10, 20)
+Hero.spawn();
+let John = new Zombie("John", 100, 5, 20, Hero);
 John.spawn();
