@@ -1,6 +1,7 @@
 body{
     background: grey;
     padding: 0;
+    margin: 0;
 }
 #main-area{
     width: 95vw;
@@ -8,11 +9,16 @@ body{
     background: url("img/floor2.jpg") center;
     margin: 5vh auto;
 }
-#soldier{
+#human{
     position: absolute;
-    background: url("img/soldier2.png") no-repeat;
-    left: auto;
-    right: auto;
+    background: no-repeat;
+    padding: 0;
+    width: 60px;
+    height: 100px;
+}
+.zombie{
+    position: absolute;
+    background: no-repeat;
     padding: 0;
     width: 60px;
     height: 100px;
