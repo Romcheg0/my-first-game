@@ -127,20 +127,22 @@ class Zombie extends Entity{
     type = "zombie";
     object = document.createElement("div");
     target = "";
+    readyToBite = true;
 
 
-    constructor(name, health, speed, damage, skin = "url(img/zombie2.png)"){
+    constructor(name, health, speed, damage, target, skin = "url(img/zombie2.png)"){
         super(name);
         this.health=health;
         this.speed=speed;
         this.damage=damage;
+        this.target=target;
+        this.target.object=document.getElementById("human");
         this.skin=skin;
         this.object.style.background=skin;
     }
 
     spawn(){
         this.object.className = this.type;
-        this.target=document.getElementById("human");
         mainArea.appendChild(this.object);
 
         var sides = new Array("left", "right");
@@ -176,9 +178,18 @@ class Zombie extends Entity{
 
     moving(){
         var moveCheck = setInterval(()=>{
+            if(!this.target){
+                return;
+            }
+            var biteReadyX = false;
+            var biteReadyY = false;
             
-            if (this.target.offsetLeft > this.object.offsetLeft){
-                if(this.target.offsetLeft - this.object.offsetLeft <=30){
+            if (this.target.object.offsetLeft > this.object.offsetLeft){
+                if(this.target.object.offsetLeft - this.object.offsetLeft <=20){
+                    biteReadyX = true;
+
+                }
+                if(this.target.object.offsetLeft - this.object.offsetLeft <=20){
                     
                 }
                 else{
@@ -191,8 +202,11 @@ class Zombie extends Entity{
                 }
             }
             else{
-                if(this.object.offsetLeft - this.target.offsetLeft <=30){
-                    
+                if(this.object.offsetLeft - this.target.object.offsetLeft <=20){
+                    biteReadyX = true;
+                }
+                if(this.object.offsetLeft - this.target.object.offsetLeft <=20){
+
                 }
                 else{
                     this.object.style.left = parseInt(this.object.offsetLeft - this.speed) + "px";
@@ -202,23 +216,50 @@ class Zombie extends Entity{
                     this.object.isTurned = true;
                 }
             }
-            if(this.target.offsetTop > this.object.offsetTop){
-                if(this.target.offsetTop + this.target.offsetHeight - this.object.offsetTop <=10){
-                    return;
+            if(this.target.object.offsetTop > this.object.offsetTop){
+                if(this.target.object.offsetTop + this.target.object.offsetHeight - this.object.offsetTop <=30){
+                    biteReadyY = true;
                 }
-                this.object.style.top = parseInt(this.object.offsetTop + this.speed) + "px";
+                else{
+                    this.object.style.top = parseInt(this.object.offsetTop + this.speed) + "px";
+                }
             }
             else{
-                if(this.object.offsetTop - this.target.offsetTop <=10){
-                    return;
+                if(this.object.offsetTop - this.target.object.offsetTop <=30){
+                    biteReadyY = true;
                 }
-                this.object.style.top = parseInt(this.object.offsetTop - this.speed) + "px";
+                else{
+                    this.object.style.top = parseInt(this.object.offsetTop - this.speed) + "px";
+                }
             }
-        }, 50)
+            
+            if(this.readyToBite && biteReadyX && biteReadyY){
+                    this.bite();
+                    this.readyToBite = false;
+                    setTimeout(() => {
+                        this.readyToBite = true; 
+                     }, 1500);
+                }
+            }
+        , 50)
+    }
+
+    bite(){
+        this.target.health -= this.damage;
+        console.log(this.target.health);
+        if(this.target.health <= 0){
+            this.target = null;
+            mainArea.removeChild(document.getElementById("human"));
+            for(var i = 0; i < document.getElementsByClassName("zombie").length; i++){
+                mainArea.removeChild(document.getElementsByClassName("zombie")[i]);
+                mainArea.style.background="red";
+            }
+        }
+        
     }
 }
 
 let Bill = new Human("Bill", 100, 10, 20)
 Bill.spawn();
-let John = new Zombie("John", 100, 5, 20);
+let John = new Zombie("John", 100, 5, 20, Bill);
 John.spawn();
