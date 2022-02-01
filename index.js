@@ -147,6 +147,7 @@ class Human extends Entity{
         this.object.style.top = parseInt(this.object.offsetHeight*3 + mainArea.offsetTop) + 'px';
         this.object.style.left = parseInt(this.object.offsetWidth*12 + mainArea.offsetLeft) + 'px';
         this.moving();
+        spawner();
     }
     shoot(){
         var bullet = new Bullet();
@@ -161,7 +162,7 @@ class Human extends Entity{
                 if(parseInt(bullet.object.offsetLeft+bullet.object.offsetWidth) >= parseInt(mainArea.offsetLeft + mainArea.offsetWidth)){
                     mainArea.removeChild(bullet.object);
                 }
-            }, 20)
+            }, 50)
 
             trace;
         }
@@ -174,7 +175,7 @@ class Human extends Entity{
                         mainArea.removeChild(bullet.object);
                     }
                 }
-            }, 20)
+            }, 50)
 
             trace;
         }
@@ -188,6 +189,7 @@ class Zombie extends Entity{
     object = document.createElement("div");
     target = "";
     readyToBite = true;
+    isDead = false;
 
 
     constructor(name, health, speed, damage, target, skin = "url(img/zombie2.png)"){
@@ -238,7 +240,8 @@ class Zombie extends Entity{
 
     moving(){
         var moveCheck = setInterval(()=>{
-            if(!this.target){
+            if(!this.target || !this.object || this.target.health <= 0){
+                clearInterval(moveCheck);
                 return;
             }
             var biteReadyX = false;
@@ -292,7 +295,7 @@ class Zombie extends Entity{
                     this.object.style.top = parseInt(this.object.offsetTop - this.speed) + "px";
                 }
             }
-            
+            /*================Biting interval================*/
             if(this.readyToBite && biteReadyX && biteReadyY){
                     this.bite();
                     this.readyToBite = false;
@@ -300,7 +303,45 @@ class Zombie extends Entity{
                         this.readyToBite = true; 
                      }, 1500);
                 }
+            
+            /*======Bullet hit check========================*/
+            if(!this.isDead){
+                for(var i = 0; i < document.getElementsByClassName("bullet").length; i++){
+                    if((this.object.offsetLeft <= document.getElementsByClassName("bullet")[i].offsetLeft) &&
+                    (document.getElementsByClassName("bullet")[i].offsetLeft <= parseInt(this.object.offsetLeft + this.object.offsetWidth)) &&
+                    (this.object.offsetTop <= document.getElementsByClassName("bullet")[i].offsetTop) &&
+                    (document.getElementsByClassName("bullet")[i].offsetTop <= parseInt(this.object.offsetTop + this.object.offsetHeight))){
+                            mainArea.removeChild(document.getElementsByClassName("bullet")[i]);
+                            this.health -= this.target.damage;
+                            if(this.health <= 0){
+                                this.speed = 0;
+                                this.damage = 0;
+                                this.isDead = true;
+                                if(this.isTurned){
+                                    this.object.animate([
+                                        {opacity: 1},
+                                        {transform:"rotateZ(90deg)", opacity: 1},
+                                        {transform:"rotateZ(90deg)", opacity: 0}
+                                    ], 2000)
+                                }
+                                else{
+                                    this.object.animate([
+                                        {opacity: 1},
+                                        {transform:"rotateZ(-90deg)", opacity: 1},
+                                        {transform:"rotateZ(-90deg)", opacity: 0}
+                                    ], 2000)
+                                }
+                                setTimeout(() => {
+                                    fragsInfo.textContent = parseInt(fragsInfo.textContent) + 1;
+                                    mainArea.removeChild(this.object);    
+                                }, 2000);
+                                
+                            }
+                    }
+                }
             }
+            /*===================*/
+        }       
         , 50)
     }
 
@@ -308,8 +349,10 @@ class Zombie extends Entity{
         this.target.health -= this.damage;
         healthInfo.textContent = this.target.health;
         if(this.target.health <= 0){
-            this.target = null;
-            mainArea.removeChild(document.getElementById("human"));
+            this.object = null;
+            if(document.getElementById("human")){
+                mainArea.removeChild(document.getElementById("human"));
+            }
             for(var i = 0; i < document.getElementsByClassName("zombie").length; i++){
                 mainArea.removeChild(document.getElementsByClassName("zombie")[i]);
                 mainArea.style.transition="2s";
@@ -331,5 +374,16 @@ class Bullet{
 }
 let Hero = new Human("Bill", 100, 100, 10, 20)
 Hero.spawn();
-/*let John = new Zombie("John", 100, 5, 20, Hero);
-John.spawn();*/
+
+function spawner(){
+    var i = 0;
+    var spawnInterval = setInterval(() => {
+        console.log('a');
+        let z = new Zombie("simplezomb", 100, 5, 20, Hero);
+        if(!(Hero.health <= 0)){
+            z.spawn();
+        }
+    }, 2000);
+
+    spawnInterval;
+}
