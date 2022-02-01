@@ -15,6 +15,7 @@ var wPressed = false;
 var aPressed = false;
 var sPressed = false;
 var dPressed = false;
+var spacePressed = false;
 
 document.addEventListener("keydown", function(){
         if (event.code=='KeyW'){
@@ -28,6 +29,9 @@ document.addEventListener("keydown", function(){
         }
         if (event.code=='KeyD'){
             dPressed = true;
+        }
+        if (event.code=='Space'){
+            spacePressed = true;
         }
 })
 
@@ -43,6 +47,9 @@ document.addEventListener("keyup", function(){
         }
         if (event.code == "KeyD"){
             dPressed = false;
+        }
+        if (event.code=='Space'){
+            spacePressed = false;
         }
 })
 
@@ -105,6 +112,10 @@ class Entity{
                 this.object.style.left = parseInt(this.object.offsetLeft) + this.speed + 'px';
             }
         }
+
+        if(spacePressed){
+            this.shoot();
+        }
     }, 50)
     }
 }
@@ -136,6 +147,38 @@ class Human extends Entity{
         this.object.style.top = parseInt(this.object.offsetHeight*3 + mainArea.offsetTop) + 'px';
         this.object.style.left = parseInt(this.object.offsetWidth*12 + mainArea.offsetLeft) + 'px';
         this.moving();
+    }
+    shoot(){
+        var bullet = new Bullet();
+        
+        mainArea.appendChild(bullet.object);
+        bullet.object.style.left = parseInt(this.object.offsetLeft + this.object.offsetWidth) + 'px';
+        bullet.object.style.top = parseInt(this.object.offsetTop + this.object.offsetHeight*0.55) + 'px';
+        if(!this.isTurned){
+            bullet.object.style.transform = "rotateY(180deg)";
+            var trace = setInterval(()=>{
+                bullet.object.style.left = parseInt(bullet.object.offsetLeft + bullet.speed) + 'px';
+                if(parseInt(bullet.object.offsetLeft+bullet.object.offsetWidth) >= parseInt(mainArea.offsetLeft + mainArea.offsetWidth)){
+                    mainArea.removeChild(bullet.object);
+                }
+            }, 20)
+
+            trace;
+        }
+        else{
+            bullet.object.style.left = parseInt(bullet.object.offsetLeft - this.object.offsetWidth) + 'px';
+            var trace = setInterval(()=>{
+                bullet.object.style.left = parseInt(bullet.object.offsetLeft - bullet.speed) + 'px';
+                if(parseInt(bullet.object.offsetLeft) <= parseInt(mainArea.offsetLeft)){
+                    if(mainArea.contains(bullet.object)){
+                        mainArea.removeChild(bullet.object);
+                    }
+                }
+            }, 20)
+
+            trace;
+        }
+        
     }
 
 }
@@ -279,10 +322,14 @@ class Zombie extends Entity{
 }
 
 class Bullet{
-    damage = 20;
+    object = document.createElement("div");
     speed = 30;
+    constructor(speed = 30){
+        this.speed = speed;
+        this.object.className="bullet";
+    }
 }
 let Hero = new Human("Bill", 100, 100, 10, 20)
 Hero.spawn();
-let John = new Zombie("John", 100, 5, 20, Hero);
-John.spawn();
+/*let John = new Zombie("John", 100, 5, 20, Hero);
+John.spawn();*/

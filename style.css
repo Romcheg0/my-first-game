@@ -32,3 +32,13 @@ body{
     color: white;
     z-index: 4;
 }
+.bullet{
+    position: absolute;
+
+    width: 5px;
+    height: 2px;
+    background: goldenrod;
+    border-top-left-radius: 50%;
+    border-bottom-left-radius: 50%;
+    z-index: 2;
+}
