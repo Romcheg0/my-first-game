@@ -32,6 +32,9 @@ body{
     color: white;
     z-index: 4;
 }
+#game-info td{
+    font-size: 1vw;
+}
 .bullet{
     position: absolute;
 

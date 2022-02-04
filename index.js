@@ -2,11 +2,12 @@ var mainArea = document.getElementById("main-area");
 var gameInfo = document.getElementById("game-info");
 var nameInfo = gameInfo.getElementsByTagName("caption")[0];
 var healthInfo = gameInfo.getElementsByTagName("td")[1];
-var ammoInfo = gameInfo.getElementsByTagName("td")[3];
-var fragsInfo = gameInfo.getElementsByTagName("td")[5];
+var ammoMagInfo = gameInfo.getElementsByTagName("td")[3];
+var ammoInfo = gameInfo.getElementsByTagName("td")[5]
+var fragsInfo = gameInfo.getElementsByTagName("td")[7];
+var warningInfo = gameInfo.getElementsByTagName("td")[8];
 
-console.log(nameInfo, healthInfo, ammoInfo, fragsInfo);
-
+gameInfo.style.width = "9vw";
 gameInfo.style.left = parseInt(mainArea.offsetLeft+mainArea.offsetWidth-gameInfo.offsetWidth) + 'px';
 gameInfo.style.top = mainArea.offsetTop + 'px';
 
@@ -16,22 +17,26 @@ var aPressed = false;
 var sPressed = false;
 var dPressed = false;
 var spacePressed = false;
+var rPressed = false;
 
 document.addEventListener("keydown", function(){
-        if (event.code=='KeyW'){
+        if (event.code =='KeyW'){
             wPressed = true;
         }
-        if (event.code=='KeyA'){
+        if (event.code =='KeyA'){
             aPressed = true;
         }
-        if (event.code=='KeyS'){
+        if (event.code =='KeyS'){
             sPressed = true;
         }
-        if (event.code=='KeyD'){
+        if (event.code =='KeyD'){
             dPressed = true;
         }
-        if (event.code=='Space'){
+        if (event.code =='Space'){
             spacePressed = true;
+        }
+        if (event.code == 'KeyR') {
+            rPressed = true;
         }
 })
 
@@ -50,6 +55,9 @@ document.addEventListener("keyup", function(){
         }
         if (event.code=='Space'){
             spacePressed = false;
+        }
+        if (event.code == "KeyR"){
+            rPressed = false;
         }
 })
 
@@ -113,8 +121,20 @@ class Entity{
             }
         }
 
-        if(spacePressed){
+        if (spacePressed){
             this.shoot();
+        }
+        if (rPressed){
+            if(this.ammo > 0){
+                warningInfo.textContent = "Reloading...";
+                setTimeout(() => {
+                    this.reload();    
+                }, 1200);
+            }
+            else{
+                warningInfo.textContent = "No ammo!";
+            }
+            
         }
     }, 50)
     }
@@ -123,11 +143,13 @@ class Entity{
 class Human extends Entity{
     type = "human";
     object = document.createElement("div");
+    ammoMag = 30;
     ammo = 100;
 
-    constructor(name, health, ammo, speed, damage, skin = "url(img/soldier2.png)"){
+    constructor(name, health, ammoMag, ammo, speed, damage, skin = "url(img/soldier2.png)"){
         super(name);
         this.health = health;
+        this.ammoMag = ammoMag;
         this.ammo = ammo;
         this.speed = speed;
         this.damage = damage;
@@ -136,6 +158,7 @@ class Human extends Entity{
 
         nameInfo.textContent = name;
         healthInfo.textContent = this.health;
+        ammoMagInfo.textContent = this.ammoMag;
         ammoInfo.textContent = this.ammo;
     }
 
@@ -150,36 +173,60 @@ class Human extends Entity{
         spawner();
     }
     shoot(){
-        var bullet = new Bullet();
+        if(this.ammoMag > 0){
+            var bullet = new Bullet();
         
-        mainArea.appendChild(bullet.object);
-        bullet.object.style.left = parseInt(this.object.offsetLeft + this.object.offsetWidth) + 'px';
-        bullet.object.style.top = parseInt(this.object.offsetTop + this.object.offsetHeight*0.55) + 'px';
-        if(!this.isTurned){
-            bullet.object.style.transform = "rotateY(180deg)";
-            var trace = setInterval(()=>{
-                bullet.object.style.left = parseInt(bullet.object.offsetLeft + bullet.speed) + 'px';
-                if(parseInt(bullet.object.offsetLeft+bullet.object.offsetWidth) >= parseInt(mainArea.offsetLeft + mainArea.offsetWidth)){
-                    mainArea.removeChild(bullet.object);
-                }
-            }, 50)
+            mainArea.appendChild(bullet.object);
+            bullet.object.style.left = parseInt(this.object.offsetLeft + this.object.offsetWidth) + 'px';
+            bullet.object.style.top = parseInt(this.object.offsetTop + this.object.offsetHeight*0.55) + 'px';
 
-            trace;
-        }
-        else{
-            bullet.object.style.left = parseInt(bullet.object.offsetLeft - this.object.offsetWidth) + 'px';
-            var trace = setInterval(()=>{
-                bullet.object.style.left = parseInt(bullet.object.offsetLeft - bullet.speed) + 'px';
-                if(parseInt(bullet.object.offsetLeft) <= parseInt(mainArea.offsetLeft)){
-                    if(mainArea.contains(bullet.object)){
+            if(!this.isTurned){
+                bullet.object.style.transform = "rotateY(180deg)";
+                var trace = setInterval(()=>{
+                    bullet.object.style.left = parseInt(bullet.object.offsetLeft + bullet.speed) + 'px';
+                    if(parseInt(bullet.object.offsetLeft+bullet.object.offsetWidth) >= parseInt(mainArea.offsetLeft + mainArea.offsetWidth)){
                         mainArea.removeChild(bullet.object);
                     }
-                }
-            }, 50)
+                }, 50)
 
-            trace;
+                trace;
+            }
+            else{
+                bullet.object.style.left = parseInt(bullet.object.offsetLeft - this.object.offsetWidth) + 'px';
+                var trace = setInterval(()=>{
+                    bullet.object.style.left = parseInt(bullet.object.offsetLeft - bullet.speed) + 'px';
+                    if(parseInt(bullet.object.offsetLeft) <= parseInt(mainArea.offsetLeft)){
+                        if(mainArea.contains(bullet.object)){
+                            mainArea.removeChild(bullet.object);
+                        }
+                    }
+                }, 50)
+
+                trace;
+            }
+            this.ammoMag--;
+            ammoMagInfo.textContent = this.ammoMag;//////////////////////////////////////////////////////
+        }
+        else{
+            warningInfo.textContent=`'R' - Reload`;
         }
         
+    }
+    reload(){
+        warningInfo.textContent = "";
+        var amount = parseInt(30 - this.ammoMag);
+        if(this.ammo > amount){
+            this.ammo -= amount;
+            ammoInfo.textContent = this.ammo;
+            this.ammoMag += amount;
+            ammoMagInfo.textContent = this.ammoMag;
+        }
+        else{
+            this.ammoMag += this.ammo;
+            this.ammo = 0;
+            ammoMagInfo.textContent = this.ammoMag;
+            ammoInfo.textContent = 0;
+        }
     }
 
 }
@@ -333,7 +380,9 @@ class Zombie extends Entity{
                                 }
                                 setTimeout(() => {
                                     fragsInfo.textContent = parseInt(fragsInfo.textContent) + 1;
-                                    mainArea.removeChild(this.object);    
+                                    if(mainArea.contains(this.object)){
+                                        mainArea.removeChild(this.object);
+                                    }
                                 }, 2000);
                                 
                             }
@@ -372,13 +421,12 @@ class Bullet{
         this.object.className="bullet";
     }
 }
-let Hero = new Human("Bill", 100, 100, 10, 20)
+let Hero = new Human("Bill", 100, 30, 3000, 10, 10)
 Hero.spawn();
 
 function spawner(){
     var i = 0;
     var spawnInterval = setInterval(() => {
-        console.log('a');
         let z = new Zombie("simplezomb", 100, 5, 20, Hero);
         if(!(Hero.health <= 0)){
             z.spawn();
