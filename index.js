@@ -126,10 +126,9 @@ class Entity{
         }
         if (rPressed){
             if(this.ammo > 0){
-                warningInfo.textContent = "Reloading...";
-                setTimeout(() => {
+                if(this.ammoMag < 30){
                     this.reload();    
-                }, 1200);
+                }
             }
             else{
                 warningInfo.textContent = "No ammo!";
@@ -145,6 +144,7 @@ class Human extends Entity{
     object = document.createElement("div");
     ammoMag = 30;
     ammo = 100;
+    isReadyToShoot = true;
 
     constructor(name, health, ammoMag, ammo, speed, damage, skin = "url(img/soldier2.png)"){
         super(name);
@@ -170,11 +170,65 @@ class Human extends Entity{
         this.object.style.top = parseInt(this.object.offsetHeight*3 + mainArea.offsetTop) + 'px';
         this.object.style.left = parseInt(this.object.offsetWidth*12 + mainArea.offsetLeft) + 'px';
         this.moving();
-        spawner();
+        //spawner();
     }
     shoot(){
-        if(this.ammoMag > 0){
+        if(warningInfo.textContent == "Reloading..."){
+            return;
+        }
+
+        if(this.ammoMag > 0 && this.isReadyToShoot){
+
+            this.isReadyToShoot = false;
+            setTimeout(() => {
+                this.isReadyToShoot = true;
+            }, 90);
+
             var bullet = new Bullet();
+
+            var typeOfVoice = Math.floor(1 + Math.random() * 3);
+            
+            switch(typeOfVoice){
+                case 1:
+                    var shotVoice = document.createElement("audio");
+                    shotVoice.src="audio/rifle-shot1.wav";
+                    shotVoice.autoplay = true;
+                    setTimeout(() => {
+                        var shellVoice = document.createElement("audio");
+                        shellVoice.src="audio/rifle-shell1.wav";
+                        shellVoice.autoplay = true;
+                    }, 500);
+                    break;
+                case 2:
+                    var shotVoice = document.createElement("audio");
+                    shotVoice.src="audio/rifle-shot2.wav";
+                    shotVoice.autoplay = true;
+                    setTimeout(() => {
+                        var shellVoice = document.createElement("audio");
+                        shellVoice.src="audio/rifle-shell2.wav";
+                        shellVoice.autoplay = true;
+                    }, 500);
+                    break;
+                case 3:
+                    var shotVoice = document.createElement("audio");
+                    shotVoice.src="audio/rifle-shot3.wav";
+                    shotVoice.autoplay = true;
+                    setTimeout(() => {
+                        var shellVoice = document.createElement("audio");
+                        shellVoice.src="audio/rifle-shell3.wav";
+                        shellVoice.autoplay = true;
+                    }, 500);
+                    break;
+            }
+
+            var shotVoice = document.createElement("audio");
+            shotVoice.src="audio/rifle-shot2.wav";
+            shotVoice.autoplay = true;
+            setTimeout(() => {
+                var shellVoice = document.createElement("audio");
+                shellVoice.src="audio/rifle-shell2.wav";
+                shellVoice.autoplay = true;
+            }, 500);
         
             mainArea.appendChild(bullet.object);
             bullet.object.style.left = parseInt(this.object.offsetLeft + this.object.offsetWidth) + 'px';
@@ -213,20 +267,41 @@ class Human extends Entity{
         
     }
     reload(){
-        warningInfo.textContent = "";
-        var amount = parseInt(30 - this.ammoMag);
-        if(this.ammo > amount){
-            this.ammo -= amount;
-            ammoInfo.textContent = this.ammo;
-            this.ammoMag += amount;
-            ammoMagInfo.textContent = this.ammoMag;
+        if(warningInfo.textContent == "Reloading..."){
+            return;
+        }
+        warningInfo.textContent = "Reloading...";
+        var timing;
+        if(this.ammoMag == 0){
+            var reloadVoice = document.createElement("audio");
+            reloadVoice.src="audio/rifle-reload-emp.wav";
+            reloadVoice.autoplay=true;
+            timing = 2500;
         }
         else{
-            this.ammoMag += this.ammo;
-            this.ammo = 0;
-            ammoMagInfo.textContent = this.ammoMag;
-            ammoInfo.textContent = 0;
+            var reloadVoice = document.createElement("audio");
+            reloadVoice.src="audio/rifle-reload-nemp.wav";
+            reloadVoice.autoplay=true;
+            timing = 1800;
         }
+
+        setTimeout(() => {
+            warningInfo.textContent = "";
+            var amount = parseInt(30 - this.ammoMag);
+            if(this.ammo > amount){
+                this.ammo -= amount;
+                ammoInfo.textContent = this.ammo;
+                this.ammoMag += amount;
+                ammoMagInfo.textContent = this.ammoMag;
+            }
+            else{
+                this.ammoMag += this.ammo;
+                this.ammo = 0;
+                ammoMagInfo.textContent = this.ammoMag;
+                ammoInfo.textContent = 0;
+            }
+        }, timing);
+        
     }
 
 }
