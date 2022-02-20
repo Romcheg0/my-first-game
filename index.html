@@ -9,8 +9,66 @@
     <script defer src="index.js"></script>
 </head>
 <body>
+    <section id="main-menu">
+        <h1>NO WAY TO LIVE</h1>
+        <form id="start-form">
+            <span id="player-info"></span>
+            <a id="login">LOG IN</a>
+            <a id="register">REGISTER</a>
+            <a id="logoutd">LOG OUT</a>
+            <a id="playd">PLAY</a>
+        </form>
+            
+        <form id="register-form">
+            <a class="back">&lt BACK</a>
+            <table id="register-table">
+                <tr>
+                    <th>Nickname:</th>
+                    <td>
+                        <input id="register-input" type="text" placeholder="Your nickname" required/>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Email:</th>
+                    <td>
+                        <input id="register-input" type="email" placeholder="Your email" required/>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Password:</th>
+                    <td>
+                        <input id="register-input" type="password" placeholder="Your password" required/>
+                        <span>Must be from 8 to 16 characters</span>
+                    </td>
+                </tr>
+            </table>
+            <button id="register-submit" type="submit button">REGISTER</button>
+            <h2 id="register-info"></h2>
+        </form>
+        
+        <form id="login-form">
+            <a class="back">&lt BACK</a>
+            <table id="login-table">
+                <tr>
+                    <th>Email:</th>
+                    <td>
+                        <input id="login-input" type="email" placeholder="Your email" required/>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Password:</th>
+                    <td>
+                        <input id="register-input" type="password" placeholder="Your password" required/>
+                    </td>
+                </tr>
+            </table>
+            <button id="login-submit" type="submit button">LOGIN</button>
+            <h2 id="login-info"></h2>
+        </form>
+
+    </section>
     <section id="main-area">
-        <div id="game-info">
+        <!-- <div id="game-info">
             <table>
                 <caption>Player</caption>
                 <tr>
@@ -31,7 +89,7 @@
                     <td colspan="2"></td>
                 </tr>
             </table>
-        </div>
+        </div> -->
     </section>
 </body>
 </html>

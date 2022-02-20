@@ -1,16 +1,32 @@
+var mainMenu = document.getElementById("main-menu");
+var startForm = document.getElementById("start-form");
+var loginButton = document.getElementById("login");
+var registerButton = document.getElementById("register");
+var registerForm = document.getElementById("register-form");
+var registerTable = document.getElementById("register-table");
+var loginForm = document.getElementById("login-form");
+var loginTable = document.getElementById("login-table");
+var gameInfo;
+var nameInfo;
+var healthInfo;
+var ammoMagInfo;
+var ammoInfo;
+var fragsInfo;
+var warningInfo;
 var mainArea = document.getElementById("main-area");
-var gameInfo = document.getElementById("game-info");
-var nameInfo = gameInfo.getElementsByTagName("caption")[0];
-var healthInfo = gameInfo.getElementsByTagName("td")[1];
-var ammoMagInfo = gameInfo.getElementsByTagName("td")[3];
-var ammoInfo = gameInfo.getElementsByTagName("td")[5]
-var fragsInfo = gameInfo.getElementsByTagName("td")[7];
-var warningInfo = gameInfo.getElementsByTagName("td")[8];
 
-gameInfo.style.width = "9vw";
-gameInfo.style.left = parseInt(mainArea.offsetLeft+mainArea.offsetWidth-gameInfo.offsetWidth) + 'px';
-gameInfo.style.top = mainArea.offsetTop + 'px';
+var User = {
+    nickname: "",
+    email: "",
+    password: "",
+    score: 0
+}
 
+mainMenu.style.left = parseInt(mainArea.offsetLeft + mainArea.offsetWidth/2 - mainMenu.offsetWidth/2) + 'px';
+mainMenu.style.top = parseInt(mainArea.offsetTop + mainArea.offsetHeight/2 - mainMenu.offsetHeight/2) + 'px';
+
+registerButton.addEventListener("click", showRegister);
+loginButton.addEventListener("click", showLogin);
 
 var wPressed = false;
 var aPressed = false;
@@ -18,6 +34,9 @@ var sPressed = false;
 var dPressed = false;
 var spacePressed = false;
 var rPressed = false;
+
+
+
 
 document.addEventListener("keydown", function(){
         if (event.code =='KeyW'){
@@ -145,6 +164,7 @@ class Human extends Entity{
     ammoMag = 30;
     ammo = 100;
     isReadyToShoot = true;
+    user = undefined;
 
     constructor(name, health, ammoMag, ammo, speed, damage, skin = "url(img/soldier2.png)"){
         super(name);
@@ -156,29 +176,37 @@ class Human extends Entity{
         this.skin = skin;
         this.object.style.background = skin;
 
-        nameInfo.textContent = name;
-        healthInfo.textContent = this.health;
-        ammoMagInfo.textContent = this.ammoMag;
-        ammoInfo.textContent = this.ammo;
+        if(document.getElementById("game-info")){
+            nameInfo.textContent = name;
+            healthInfo.textContent = this.health;
+            ammoMagInfo.textContent = this.ammoMag;
+            ammoInfo.textContent = this.ammo;
+        }
     }
 
-    spawn(){
-        this.object.id = this.type;
-        
-        mainArea.appendChild(this.object);
 
+
+    spawn(){
+        this.object = document.createElement("div");
+        this.object.style.background=this.skin;
+        this.object.id = this.type;
+        if(this.isTurned){
+            this.object.style.transform="rotateY(180deg)";
+        }
+        mainArea.appendChild(this.object);
+        
         this.object.style.top = parseInt(this.object.offsetHeight*3 + mainArea.offsetTop) + 'px';
         this.object.style.left = parseInt(this.object.offsetWidth*12 + mainArea.offsetLeft) + 'px';
+
+        this.isReadyToShoot=true;
         this.moving();
-        //spawner();
+        spawner();
     }
     shoot(){
         if(warningInfo.textContent == "Reloading..."){
             return;
         }
-
         if(this.ammoMag > 0 && this.isReadyToShoot){
-
             this.isReadyToShoot = false;
             setTimeout(() => {
                 this.isReadyToShoot = true;
@@ -262,7 +290,9 @@ class Human extends Entity{
             ammoMagInfo.textContent = this.ammoMag;//////////////////////////////////////////////////////
         }
         else{
-            warningInfo.textContent=`'R' - Reload`;
+            if(this.ammoMag==0){
+                warningInfo.textContent=`'R' - Reload`;
+            }
         }
         
     }
@@ -468,21 +498,11 @@ class Zombie extends Entity{
         }       
         , 50)
     }
-
-    bite(){
+    bite(){                        
         this.target.health -= this.damage;
         healthInfo.textContent = this.target.health;
-        if(this.target.health <= 0){
-            this.object = null;
-            if(document.getElementById("human")){
-                mainArea.removeChild(document.getElementById("human"));
-            }
-            for(var i = 0; i < document.getElementsByClassName("zombie").length; i++){
-                mainArea.removeChild(document.getElementsByClassName("zombie")[i]);
-                mainArea.style.transition="2s";
-                mainArea.style.width="0";
-                mainArea.innerHTML="";
-            }
+        if(this.target.health <= 0){                    //endgame!
+            endGame();
         }
         
     }
@@ -496,17 +516,212 @@ class Bullet{
         this.object.className="bullet";
     }
 }
-let Hero = new Human("Bill", 100, 30, 3000, 10, 10)
-Hero.spawn();
+
+function showRegister(){
+    startForm.style.display="none";
+    document.getElementById("register-info").style.display="none";
+    registerForm.style.display="block";
+
+    registerForm.addEventListener("submit", ()=>{
+        document.getElementById("register-info").style.display="none";
+
+        event.preventDefault();
+        
+        var name = registerForm.getElementsByTagName("input")[0].value;
+        var email = registerForm.getElementsByTagName("input")[1].value;
+        var pass = registerForm.getElementsByTagName("input")[2].value;
+
+        document.getElementById("register-info").style.display="block";
+
+        if(!(/^\w{6,18}$/.test(pass))){
+            document.getElementById("register-info").textContent="Invalid password";
+            return;
+        }
+
+        User = {nickname: name, email: email, password: pass, score: 0};
+        var JUser = JSON.stringify(User);
+
+        
+
+        if(validateRegister(email)){
+            localStorage.setItem(email, JUser);
+            document.getElementById("register-info").textContent="Success";
+
+            showStartForm(2000);
+            return;
+        }
+        else{
+            document.getElementById("register-info").textContent="This email is already used";
+            return;
+        }
+    })
+    registerForm.getElementsByTagName("a")[0].addEventListener("click", ()=>showStartForm(0));
+}
+function showLogin(){
+    console.log(localStorage);
+    startForm.style.display="none";
+    document.getElementById("login-info").style.display="none";
+    loginForm.style.display="block";
+
+    loginForm.addEventListener("submit", ()=>{
+        document.getElementById("login-info").style.display="none";
+
+        event.preventDefault();
+        
+        var email = loginForm.getElementsByTagName("input")[0].value;
+        var pass = loginForm.getElementsByTagName("input")[1].value;
+
+        document.getElementById("login-info").style.display="block";
+        
+        if(localStorage.getItem(email)){
+            console.log(JSON.parse(localStorage.getItem(email)).password);
+            console.log(pass);
+            if(JSON.parse(localStorage.getItem(email)).password == pass){
+                document.getElementById("login-info").textContent="Success";
+
+                if(document.getElementById("logoutd")){
+                    document.getElementById("logoutd").id="logout";
+                }
+                if(document.getElementById("playd")){
+                    document.getElementById("playd").id="play";
+                }
+
+                document.getElementById("logout").addEventListener("click", ()=>{
+                    document.getElementById("player-info").textContent="";
+                    document.getElementById("logout").id="logoutd";
+                document.getElementById("play").id="playd";
+                })
+
+                document.getElementById("play").addEventListener("click", ()=>{
+                    startGame(JSON.parse(localStorage.getItem(email)))
+                });
+
+                document.getElementById("player-info").textContent=JSON.parse(localStorage.getItem(email)).nickname + " | High score: " + JSON.parse(localStorage.getItem(email)).score;
+
+                showStartForm(2000);
+            }
+            else{
+                document.getElementById("login-info").textContent="Invalid password";
+            }
+        }
+        else{
+            document.getElementById("login-info").textContent="Invalid email";
+
+        }
+    })
+    loginForm.getElementsByTagName("a")[0].addEventListener("click", ()=>showStartForm(0));
+}
+
+function validateRegister(e){
+    for(i = 0; i < localStorage.length; i++){
+        if(localStorage.key(i) == e){
+            return false;
+        }
+    }
+    return true;
+}
+
+function showStartForm(t){
+    setTimeout(() => {
+        startForm.style.display="flex";
+        registerForm.style.display="none";
+        loginForm.style.display="none";
+    }, t);
+}
+
+var Hero = new Human("Human", 100, 30, 3000, 10, 10)
+
+function startGame(p){
+    var max_id = setInterval(function () {});
+    while (max_id--) {
+    clearInterval(max_id);
+}
+    mainMenu.style.display="none";
+    mainArea.style.opacity="1";
+    mainArea.style.width="95vw";
+
+    
+
+    Hero.name= p.nickname;
+    Hero.health = 100;
+    Hero.ammoMag = 30;
+    Hero.ammo = 3000;
+    Hero.user = p;
+    setTimeout(() => {
+        mainArea.innerHTML =`
+            <div id="game-info">
+                <table>
+                    <caption>Player</caption>
+                    <tr>
+                        <td>Health:</td>
+                        <td>0</td>
+                    </tr>
+                    <tr>
+                        <td>Ammo:</td>
+                        <td>000</td>
+                        <td>/</td>
+                        <td>0</td>
+                    </tr>
+                    <tr>
+                        <td>Frags:</td>
+                        <td>0</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"></td>
+                    </tr>
+                </table>
+        `;
+        gameInfo = document.getElementById("game-info");
+        nameInfo = gameInfo.getElementsByTagName("caption")[0];
+        healthInfo = gameInfo.getElementsByTagName("td")[1];
+        ammoMagInfo = gameInfo.getElementsByTagName("td")[3];
+        ammoInfo = gameInfo.getElementsByTagName("td")[5]
+        fragsInfo = gameInfo.getElementsByTagName("td")[7];
+        warningInfo = gameInfo.getElementsByTagName("td")[8];
+
+        gameInfo.style.left=(mainArea.offsetLeft+mainArea.offsetWidth-gameInfo.offsetWidth) + "px";
+        gameInfo.style.top=(mainArea.offsetTop)+"px";
+
+        Hero.spawn();
+
+
+        nameInfo.textContent=p.nickname;
+        healthInfo.textContent=Hero.health;
+        ammoMagInfo.textContent=Hero.ammoMag;
+        ammoInfo.textContent=Hero.ammo;
+        fragsInfo.textContent=0;
+        warningInfo.textContent="";
+    }, 2000);
+}
+function endGame(){
+    if(document.getElementById("human")){
+        mainArea.removeChild(document.getElementById("human"));
+    }
+    mainArea.innerHTML =``;
+    mainArea.style.width="0";
+    mainMenu.style.opacity="0";
+    mainMenu.style.display="block";
+    mainMenu.style.opacity="1";
+
+    if(parseInt(Hero.user.score) < parseInt(fragsInfo.textContent)){
+        Hero.user.score = parseInt(fragsInfo.textContent);
+    }
+    localStorage.setItem(Hero.user.email, JSON.stringify(Hero.user));
+
+    var max_id = setInterval(function () {});
+    while (max_id--) {
+        clearInterval(max_id);
+    }
+}
 
 function spawner(){
     var i = 0;
     var spawnInterval = setInterval(() => {
-        let z = new Zombie("simplezomb", 100, 5, 20, Hero);
+        let z = new Zombie("simplezomb", 100, 5, 100, Hero);
         if(!(Hero.health <= 0)){
             z.spawn();
         }
-    }, 2000);
+    }, 3000);
 
     spawnInterval;
 }
