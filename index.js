@@ -14,6 +14,7 @@ var ammoInfo;
 var fragsInfo;
 var warningInfo;
 var mainArea = document.getElementById("main-area");
+var mainFrame = document.getElementById("main-frame");
 
 var User = {
     nickname: "",
@@ -34,8 +35,6 @@ var sPressed = false;
 var dPressed = false;
 var spacePressed = false;
 var rPressed = false;
-
-
 
 
 document.addEventListener("keydown", function(){
@@ -558,7 +557,6 @@ function showRegister(){
     registerForm.getElementsByTagName("a")[0].addEventListener("click", ()=>showStartForm(0));
 }
 function showLogin(){
-    console.log(localStorage);
     startForm.style.display="none";
     document.getElementById("login-info").style.display="none";
     loginForm.style.display="block";
@@ -574,8 +572,6 @@ function showLogin(){
         document.getElementById("login-info").style.display="block";
         
         if(localStorage.getItem(email)){
-            console.log(JSON.parse(localStorage.getItem(email)).password);
-            console.log(pass);
             if(JSON.parse(localStorage.getItem(email)).password == pass){
                 document.getElementById("login-info").textContent="Success";
 
@@ -647,6 +643,11 @@ function startGame(p){
     Hero.ammoMag = 30;
     Hero.ammo = 3000;
     Hero.user = p;
+    mainFrame.style.display="block";
+    mainFrame.style.width=mainArea.offsetWidth + "px";
+    mainFrame.style.height=mainArea.offsetHeight + "px";
+    mainFrame.style.top=mainArea.offsetTop + "px";
+    mainFrame.style.left=mainArea.offsetLeft + "px";
     setTimeout(() => {
         mainArea.innerHTML =`
             <div id="game-info">
@@ -699,9 +700,12 @@ function endGame(){
     }
     mainArea.innerHTML =``;
     mainArea.style.width="0";
+    mainFrame.style.display="none";
+
     mainMenu.style.opacity="0";
     mainMenu.style.display="block";
     mainMenu.style.opacity="1";
+    
 
     if(parseInt(Hero.user.score) < parseInt(fragsInfo.textContent)){
         Hero.user.score = parseInt(fragsInfo.textContent);
@@ -712,6 +716,7 @@ function endGame(){
     while (max_id--) {
         clearInterval(max_id);
     }
+    document.getElementById("player-info").textContent=`${Hero.user.nickname} |Score: ${Hero.user.score}`;
 }
 
 function spawner(){
